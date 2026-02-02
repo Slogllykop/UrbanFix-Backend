@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from supabase import create_client, Client
 import uuid
+import io
+from PIL import Image
 
 load_dotenv()
 
@@ -19,16 +21,23 @@ async def upload_file(file: UploadFile = File(...)):
     try:
         #Create unique file id for the uploaded image
         file_id = str(uuid.uuid4())
-        ext = file.filename.split(".")[-1]
-        storage_path = f"{file_id}.{ext}"
+        storage_path = f"{file_id}.jpg"
 
         file_bytes = await file.read()
+
+        img = Image.open(io.BytesIO(file_bytes))
+        
+        compressed_img = io.BytesIO()
+        
+        img.save(compressed_img, format="JPEG", optimize=True, quality=85)
+        
+        compressed_img.seek(0)
 
         #Upload file to storage
         supabase.storage.from_(SUPABASE_BUCKET).upload(
             path=storage_path,
-            file=file_bytes,
-            file_options={"content-type": file.content_type},
+            file=compressed_img.read(),
+            file_options={"content-type": "image/jpeg"},
         )
 
         #Generate file url

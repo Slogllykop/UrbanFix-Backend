@@ -1,0 +1,64 @@
+okay listen really close now
+this is how you run this
+
+you have python yes?
+good
+
+fill in your supabase thingies in .env
+
+these are the columns in the table
+
+id          UUID        PRIMARY KEY,
+image_url   TEXT        NOT NULL,
+category    TEXT        NOT NULL,
+validate    TEXT
+created_at
+
+
+2 categories => garbage and pothole
+
+now open terminal
+> pip install -r requirements.txt
+> uvicorn main:app --reload //to run the server with hot (ooh la la) reload
+
+go to 127.0.0.1:8000/docs
+
+you will find documentation about the post api validate
+to test the api
+click on try it out
+fill in the json values
+id => uuid
+image_url => the public url of the image in supabase storage
+category => garbage or pothole
+
+and click execute
+
+you should see your database update the validate column
+
+pothole is potholing but garbage is not yet garbaging
+
+
+
+
+##################################
+.ENV SETUP
+##################################
+
+# Supabase Configuration
+SUPABASE_URL=https://[project-id].supabase.co
+SUPABASE_KEY=[service-role-key]
+
+# Table Configuration
+TABLE_NAME=[Table Name]
+
+# YOLO Configuration
+CONFIDENCE_THRESHOLD=0.25
+IOU_THRESHOLD=0.45
+
+###################################
+
+
+
+Readme has all other stuff
+
+Words of great encouragement!! 👎🏻

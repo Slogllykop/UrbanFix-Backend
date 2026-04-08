@@ -10,7 +10,7 @@ class ValidationRequest(BaseModel):
     """Incoming payload from the frontend."""
     id: str = Field(..., description="Row ID in the database to update")
     image_url: str = Field(..., description="Supabase Storage URL of the image")
-    category: Literal["pothole", "garbage"] = Field(
+    category: Literal["pothole", "garbage", "street_lamp"] = Field(
         ..., description="Detection category — determines which ONNX model to run"
     )
 
@@ -18,6 +18,6 @@ class ValidationRequest(BaseModel):
 class ValidationResponse(BaseModel):
     """Response sent back to the frontend."""
     id: str
-    status: str = Field(..., description="'valid' if object detected, 'invalid' otherwise")
+    status: str = Field(..., description="The applied issue status ('verified', 'rejected', or 'pending')")
     message: str
     detections: int = Field(..., description="Number of objects detected in the image")

@@ -29,3 +29,5 @@ build/
 
 
 *_out.txt
+.env*
+!*.example

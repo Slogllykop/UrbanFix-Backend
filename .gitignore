@@ -26,3 +26,6 @@ Thumbs.db
 dist/
 build/
 *.egg-info/
+
+
+*_out.txt

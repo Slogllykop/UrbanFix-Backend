@@ -13,7 +13,7 @@ SUPABASE_URL: str = os.getenv("SUPABASE_URL", "https://your-project-id.supabase.
 SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "your-supabase-service-role-key")
 
 # ── Database ──────────────────────────────────────────────────────────────────
-TABLE_NAME: str = os.getenv("TABLE_NAME", "reports")
+TABLE_NAME: str = os.getenv("TABLE_NAME", "issues")
 
 # ── ONNX Model Paths ─────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parent

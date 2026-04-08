@@ -35,13 +35,20 @@ async def fetch_image_bytes(image_url: str) -> bytes:
         return response.content
 
 
-def update_validation_status(row_id: str, status: str) -> dict:
+def update_validation_status(
+    row_id: str, 
+    status: str, 
+    ai_verified: bool, 
+    category: str = None
+) -> dict:
     """
-    Update the 'validate' column for a specific row in the database.
+    Update the 'status', 'ai_verified', and other relevant columns for an issue.
 
     Args:
-        row_id:  Primary-key ID of the row to update.
-        status:  "valid" or "invalid".
+        row_id:  Primary-key UUID of the issue to update.
+        status:  One of "verified", "rejected", "pending", or "addressed".
+        ai_verified: Boolean indicating if it was AI verified.
+        category: Optional category string (e.g., "pothole", "garbage").
 
     Returns:
         The Supabase response data.
@@ -50,9 +57,23 @@ def update_validation_status(row_id: str, status: str) -> dict:
         Exception: If the update query fails.
     """
     supabase = get_supabase_client()
+    
+    # Prepare update payload based on the issues table schema
+    update_data = {
+        "status": status,
+        "ai_verified": ai_verified,
+    }
+    
+    if category:
+        update_data["category"] = category
+        
+    # Automatically set/increment priority if verified by AI
+    if status == "verified" and ai_verified:
+        update_data["priority_score"] = 10  # Base priority for AI-verified issues
+
     response = (
         supabase.table(config.TABLE_NAME)
-        .update({"validate": status})
+        .update(update_data)
         .eq("id", row_id)
         .execute()
     )

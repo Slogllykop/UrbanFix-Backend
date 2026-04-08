@@ -10,6 +10,7 @@ import numpy as np
 import cv2
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+import config
 
 from models import ValidationRequest, ValidationResponse
 from services.supabase_client import fetch_image_bytes, update_validation_status
@@ -58,9 +59,10 @@ async def validate_image(payload: ValidationRequest):
     **Flow**:
     1. Download the image from Supabase Storage via its public URL.
     2. Run the YOLO ONNX model that corresponds to ``category``.
-    3. If at least one object is detected → ``status = "valid"``.
-    4. Otherwise → ``status = "invalid"``.
-    5. Update the ``validate`` column of the matching row in Supabase.
+    3. If at least one object is detected → ``status = "verified"``.
+    4. Otherwise → ``status = "rejected"``.
+    5. If there is no model for the category → ``status = "pending"``.
+    6. Update the ``status`` and ``ai_verified`` columns in Supabase.
 
     Returns the validation result including the number of detections.
     """
@@ -93,27 +95,33 @@ async def validate_image(payload: ValidationRequest):
         )
 
     # ── 3. Run YOLO detection ─────────────────────────────────────────────
-    try:
-        detector = get_detector(category)
-        detections = detector.detect(image)
-        logger.info("Detection complete  detections=%d", detections)
-    except FileNotFoundError as exc:
-        logger.error("Model file missing: %s", exc)
-        raise HTTPException(status_code=500, detail=str(exc))
-    except Exception as exc:
-        logger.error("Detection failed: %s", exc)
-        raise HTTPException(
-            status_code=500,
-            detail=f"YOLO detection error: {exc}",
-        )
-
-    # ── 4. Determine status ───────────────────────────────────────────────
-    status = "valid" if detections > 0 else "invalid"
+    if category in config.MODEL_PATHS:
+        try:
+            detector = get_detector(category)
+            detections = detector.detect(image)
+            logger.info("Detection complete  detections=%d", detections)
+        except FileNotFoundError as exc:
+            logger.error("Model file missing: %s", exc)
+            raise HTTPException(status_code=500, detail=str(exc))
+        except Exception as exc:
+            logger.error("Detection failed: %s", exc)
+            raise HTTPException(
+                status_code=500,
+                detail=f"YOLO detection error: {exc}",
+            )
+        
+        status = "verified" if detections > 0 else "rejected"
+        ai_verified = True
+    else:
+        detections = 0
+        status = "pending"
+        ai_verified = False
+        logger.info("No AI model for category '%s', setting status to pending.", category)
 
     # ── 5. Update Supabase ────────────────────────────────────────────────
     try:
-        update_validation_status(row_id, status)
-        logger.info("Updated row %s → %s", row_id, status)
+        update_validation_status(row_id, status, ai_verified, category)
+        logger.info("Updated row %s → %s (ai_verified=%s)", row_id, status, ai_verified)
     except Exception as exc:
         logger.error("Supabase update failed: %s", exc)
         raise HTTPException(
@@ -124,6 +132,6 @@ async def validate_image(payload: ValidationRequest):
     return ValidationResponse(
         id=row_id,
         status=status,
-        message=f"Image validated as '{status}' with {detections} detection(s).",
+        message=f"Image processed as '{status}' with {detections} detection(s).",
         detections=detections,
     )

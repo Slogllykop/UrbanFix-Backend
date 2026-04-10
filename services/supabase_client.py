@@ -48,7 +48,7 @@ def update_validation_status(
         row_id:  Primary-key UUID of the issue to update.
         status:  One of "verified", "rejected", "pending", or "addressed".
         ai_verified: Boolean indicating if it was AI verified.
-        category: Optional category string (e.g., "pothole", "garbage").
+        category: Optional category string (e.g., "pothole", "garbage", "water_clog").
 
     Returns:
         The Supabase response data.

@@ -18,8 +18,9 @@ TABLE_NAME: str = os.getenv("TABLE_NAME", "issues")
 # ── ONNX Model Paths ─────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_PATHS: dict[str, Path] = {
-    "pothole": BASE_DIR / "pothole_best.onnx",
-    "garbage": BASE_DIR / "garbage_best.onnx",
+    "pothole": BASE_DIR / "models/pothole.onnx",
+    "garbage": BASE_DIR / "models/garbage.onnx",
+    "water_clog": BASE_DIR / "models/water_clog.onnx",
 }
 
 # ── YOLO Detection Thresholds ────────────────────────────────────────────────

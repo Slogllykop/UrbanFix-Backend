@@ -10,7 +10,7 @@ class ValidationRequest(BaseModel):
     """Incoming payload from the frontend."""
     id: str = Field(..., description="Row ID in the database to update")
     image_url: str = Field(..., description="Supabase Storage URL of the image")
-    category: Literal["pothole", "garbage", "street_lamp"] = Field(
+    category: Literal["pothole", "garbage", "water_clog"] = Field(
         ..., description="Detection category — determines which ONNX model to run"
     )
 

@@ -161,7 +161,7 @@ def get_detector(category: str) -> YOLODetector:
     Return a cached YOLODetector for the given *category*.
 
     Args:
-        category: ``"pothole"`` or ``"garbage"``.
+        category: ``"pothole"`` or ``"garbage"` or ``"water_clog"``.
 
     Returns:
         A ready-to-use YOLODetector instance.
